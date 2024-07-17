@@ -14,15 +14,11 @@
 
         <Button
             android:id="@+id/settingsBack_button"
-            style="@style/Widget.Material3.Button.TextButton.Icon"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            style="@style/SettingsButtons"
             android:layout_gravity="left"
             android:layout_weight="0"
-            android:backgroundTint="@color/white"
             app:iconGravity="textStart"
-            app:icon="@drawable/back_icon"
-            app:iconTint="@color/black" />
+            app:icon="@drawable/back_icon" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -30,16 +26,13 @@
             android:gravity="left|center"
             android:layout_weight="3"
             android:text="@string/menu_settings"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text_size_settings" />
+            android:textSize="@dimen/text_size_settings"
+            android:fontFamily="@font/ys_display_medium" />
 
         <Button
-            style="@style/Widget.Material3.Button.TextButton.Icon"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            style="@style/SettingsButtons"
             android:layout_gravity="right"
-            android:layout_weight="0"
-            android:backgroundTint="@color/white" />
+            android:layout_weight="0" />
 
 
     </LinearLayout>
@@ -58,12 +51,8 @@
             android:padding="@dimen/padding_list">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|start"
-                android:text="@string/dark_theme"
-                android:textColor="@color/black"
-                android:textSize="@dimen/text_size_medium" />
+                style="@style/SettingsTextView"
+                android:text="@string/dark_theme" />
 
             <Switch
                 android:layout_width="45dp"
@@ -81,19 +70,15 @@
             android:padding="@dimen/padding_list">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center|start"
-                android:text="@string/share_app"
-                android:textColor="@color/black"
-                android:textSize="@dimen/text_size_medium"/>
+                style="@style/SettingsTextView"
+                android:text="@string/share_app" />
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginRight="@dimen/layout_margin_right"
-                android:layout_gravity="end|center"
+                android:id="@+id/share"
+                style="@style/SettingsImageView"
                 app:srcCompat="@drawable/share_icon"/>
+
+
 
         </FrameLayout>
 
@@ -104,18 +89,12 @@
             android:padding="@dimen/padding_list">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center|start"
-                android:text="@string/write_to_support"
-                android:textColor="@color/black"
-                android:textSize="@dimen/text_size_medium"/>
+                style="@style/SettingsTextView"
+                android:text="@string/write_to_support" />
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="end|center"
-                android:layout_marginRight="@dimen/layout_margin_right"
+                android:id="@+id/support"
+                style="@style/SettingsImageView"
                 app:srcCompat="@drawable/support_icon"/>
 
         </FrameLayout>
@@ -127,18 +106,12 @@
             android:padding="@dimen/padding_list">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center|start"
-                android:text="@string/terms_of_use"
-                android:textColor="@color/black"
-                android:textSize="@dimen/text_size_medium"/>
+                style="@style/SettingsTextView"
+                android:text="@string/terms_of_use" />
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="end|center"
-                android:layout_marginRight="@dimen/layout_margin_right"
+                android:id="@+id/forward"
+                style="@style/SettingsImageView"
                 app:srcCompat="@drawable/forward_icon" />
 
         </FrameLayout>

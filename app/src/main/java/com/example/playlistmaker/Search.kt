@@ -7,16 +7,20 @@ import android.text.TextWatcher
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.ImageView
 
 class Search : AppCompatActivity() {
 
     private var searchText: String = ""
+    private lateinit var editText: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
+
+        editText = findViewById(R.id.searchEditText)
 
         val searchBackButton = findViewById<Button>(R.id.searchBack_button)
         val editText = findViewById<EditText>(R.id.searchEditText)
@@ -42,7 +46,6 @@ class Search : AppCompatActivity() {
                 searchText = editable?.toString() ?: ""
                 if (editable.isNullOrEmpty()) {
                     clearButton.visibility = View.INVISIBLE
-                    editText.setCompoundDrawablesRelativeWithIntrinsicBounds(searchIcon, null, null, null)
                 } else {
                     clearButton.visibility = View.VISIBLE
                 }
@@ -60,6 +63,7 @@ class Search : AppCompatActivity() {
         clearButton.setOnClickListener {
             editText.text.clear()
             clearButton.visibility = View.INVISIBLE
+            hideKeyboard()
         }
 
         // Восстановление сохраненных данных из savedInstanceState, если они есть
@@ -67,6 +71,10 @@ class Search : AppCompatActivity() {
             searchText = savedInstanceState.getString("searchText", "")
             editText.setText(searchText)
         }
+    }
+    private fun hideKeyboard() {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(editText.windowToken, 0)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

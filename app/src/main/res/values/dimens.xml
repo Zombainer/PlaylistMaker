@@ -9,8 +9,8 @@
     <dimen name="button_icon_padding">6dp</dimen>
     <dimen name="button_radius">16dp</dimen>
     <dimen name="padding_settings_main">4dp</dimen>
-    <dimen name="text_size_settings">22sp</dimen>
-    <dimen name="text_size_medium">16sp</dimen>
-    <dimen name="padding_top_list">16sp</dimen>
-    <dimen name="padding_list">16sp</dimen>
+    <dimen name="text_size_settings">22dp</dimen>
+    <dimen name="text_size_medium">16dp</dimen>
+    <dimen name="padding_top_list">16dp</dimen>
+    <dimen name="padding_list">16dp</dimen>
 </resources>

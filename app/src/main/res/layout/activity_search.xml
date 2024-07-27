@@ -43,8 +43,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="23"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -52,46 +52,54 @@
             android:padding="@dimen/padding_list">
 
             <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@drawable/rounded_edittext"
-            >
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_edittext"
+                android:orientation="horizontal">
 
 
                 <EditText
-                android:id="@+id/searchEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/search"
-                android:fontFamily="@font/ys_text_regular"
-                android:textColor="@color/black"
-                android:textColorHint="?attr/colorPrimaryVariant"
-                android:drawableStart="@drawable/search_icon"
-                android:drawableTint="?attr/colorPrimaryVariant"
-                android:background="@null"
-                android:padding="16dp"
-                android:maxLength="50"
-                android:inputType="text"
-                android:maxLines="1"
-                android:layout_marginEnd="32dp"
-                >
+                    android:id="@+id/searchEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="32dp"
+                    android:background="@null"
+                    android:drawableStart="@drawable/search_icon"
+                    android:drawableTint="?attr/colorPrimaryVariant"
+                    android:fontFamily="@font/ys_text_regular"
+                    android:hint="@string/search"
+                    android:inputType="text"
+                    android:maxLength="50"
+                    android:maxLines="1"
+                    android:padding="16dp"
+                    android:textColor="@color/black"
+                    android:textColorHint="?attr/colorPrimaryVariant">
 
                 </EditText>
 
                 <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/clearSearchButton"
-                android:layout_gravity="right|center"
-                app:srcCompat="@drawable/clear_light_mode"
-                android:layout_marginRight="12dp"
-                android:visibility="invisible"
-                />
+                    android:id="@+id/clearSearchButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|center"
+                    android:layout_marginRight="12dp"
+                    android:visibility="invisible"
+                    app:srcCompat="@drawable/clear_light_mode" />
 
 
             </FrameLayout>
         </FrameLayout>
+
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp" />
+        </RelativeLayout>
     </LinearLayout>
 
 </LinearLayout>

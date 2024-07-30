@@ -5,7 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
-class TrackAdapter(private val trackList: List<Track>) : RecyclerView.Adapter<TrackViewHolder>() {
+class TrackAdapter(private val trackList: MutableList<Track> = mutableListOf()) : RecyclerView.Adapter<TrackViewHolder>() {
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_track, parent, false)
         return TrackViewHolder(view)
@@ -17,5 +18,18 @@ class TrackAdapter(private val trackList: List<Track>) : RecyclerView.Adapter<Tr
 
     override fun getItemCount(): Int {
         return trackList.size
+    }
+
+    // Функция для обновления списка треков
+    fun updateTracks(newTracks: List<Track>) {
+        trackList.clear() // Очистить текущий список
+        trackList.addAll(newTracks) // Добавить новые треки
+        notifyDataSetChanged() // Обновить адаптер
+    }
+
+    // Функция для очистки списка треков
+    fun clearTracks() {
+        trackList.clear() // Очистить текущий список
+        notifyDataSetChanged() // Обновить адаптер
     }
 }

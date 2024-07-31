@@ -5,32 +5,33 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
-    android:padding="8dp">
+    android:padding="8dp"
+    android:paddingStart="13dp">
 
     <ImageView
         android:id="@+id/artwork"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
         android:layout_marginEnd="8dp"
         android:scaleType="centerCrop"
         />
 
     <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="vertical">
 
 
         <TextView
             android:id="@+id/track_name"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:textColor="?attr/colorSecondary"
             android:ellipsize="end"
             android:maxLines="1"
-            android:maxWidth="200dp"/>
+            android:maxWidth="300dp"/>
 
 
         <LinearLayout
@@ -39,7 +40,7 @@
             android:orientation="horizontal">
 
             <TextView
-                tools:text="artist_name"
+                tools:text="artistName"
                 android:id="@+id/artist_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -48,7 +49,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:layout_marginEnd="4dp"
-                android:maxWidth="100dp"/>
+                android:maxWidth="120dp"/>
 
             <TextView
                 android:text="•"
@@ -60,7 +61,7 @@
                 android:maxWidth="10dp"/>
 
             <TextView
-                tools:text="track_time"
+                tools:text="trackTime"
                 android:id="@+id/track_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -68,21 +69,17 @@
                 android:textColor="?attr/colorOnSecondary"
                 android:maxWidth="50dp"/>
 
+
         </LinearLayout>
 
 
     </LinearLayout>
 
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|center">
-
-        <ImageView
-            style="@style/SettingsImageView"
-            app:srcCompat="@drawable/forward_icon"
-            app:tint="?attr/colorOnSecondary"/>
-
-    </FrameLayout>
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="end|center"
+        app:srcCompat="@drawable/forward_icon"
+        app:tint="?attr/colorOnSecondary"/>
 
 </LinearLayout>

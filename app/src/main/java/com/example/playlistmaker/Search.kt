@@ -18,7 +18,6 @@ import retrofit2.Callback
 import retrofit2.Call
 import retrofit2.Response
 import android.view.inputmethod.EditorInfo
-import android.widget.FrameLayout
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -178,7 +177,7 @@ class Search : AppCompatActivity() {
                 Track(
                     trackName = result.trackName,
                     artistName = result.artistName,
-                    trackTime = result.trackTime,
+                    trackTimeMillis = result.trackTimeMillis,
                     artworkUrl100 = result.artworkUrl100
                 )
             }

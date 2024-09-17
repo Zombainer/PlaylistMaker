@@ -21,8 +21,9 @@ import android.view.inputmethod.EditorInfo
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Log
 import android.widget.TextView
-
+import android.widget.Toast
 
 class Search : AppCompatActivity() {
 
@@ -30,57 +31,64 @@ class Search : AppCompatActivity() {
     private lateinit var editText: EditText
     private lateinit var recyclerView: RecyclerView
     private lateinit var trackAdapter: TrackAdapter
+    private lateinit var historyAdapter: HistoryAdapter
     private lateinit var placeholderImage: ImageView
     private lateinit var placeholderText: TextView
     private lateinit var updateButton: Button
-
+    private lateinit var historyRecyclerView: RecyclerView
+    private lateinit var searchHistory: SearchHistory
+    private lateinit var clearHistoryButton: Button
+    private lateinit var searchHistoryTitle: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-        // Инициализация EditText для ввода текста
         editText = findViewById(R.id.searchEditText)
 
-        // Кнопка "Назад"
+
         val searchBackButton: Button = findViewById(R.id.searchBack_button)
-        // Кнопка для очистки ввода
         val clearButton: ImageView = findViewById(R.id.clearSearchButton)
-        // Инициализация placeholderImage, placeholderText и updateButton
         placeholderImage = findViewById(R.id.placeholderImage)
         placeholderText = findViewById(R.id.placeholderText)
         updateButton = findViewById(R.id.updateButton)
+
+        searchHistory = SearchHistory()  // Инициализация списка истории поиска
+        searchHistory.loadFromPreferences(getSharedPreferences("AppPreferences", Context.MODE_PRIVATE))
+
+        trackAdapter = TrackAdapter()
+        historyAdapter = HistoryAdapter()
+        searchHistoryTitle = findViewById(R.id.searchHistoryTitle)
+        historyRecyclerView = findViewById(R.id.historyRecyclerView)
+        clearHistoryButton = findViewById(R.id.clearHistoryButton)
+        historyRecyclerView.layoutManager = LinearLayoutManager(this)
+        historyRecyclerView.adapter = historyAdapter
 
         updateButton.setOnClickListener {
             performSearch(searchText)
         }
 
-        // Назначаем обработчик нажатия на кнопку "Назад"
         searchBackButton.setOnClickListener {
-            finish() // Закрываем текущую активность
+            finish()
         }
 
-        // Инициализация RecyclerView для отображения списка треков
-        recyclerView = findViewById(R.id.recyclerView)
-        trackAdapter = TrackAdapter() // Инициализируем адаптер для треков с пустым списком
+        clearHistoryButton.setOnClickListener {
+            clearSearchHistory()
+        }
 
-        // Установка LayoutManager и адаптера для RecyclerView
+        recyclerView = findViewById(R.id.recyclerView)
+
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = trackAdapter
 
-        // Настройка значка поиска в EditText
         val searchIcon: Drawable? = getDrawable(R.drawable.search_icon)
         editText.setCompoundDrawablesRelativeWithIntrinsicBounds(searchIcon, null, null, null)
         editText.compoundDrawablePadding = 16
 
-        // Настройка TextWatcher для EditText
         editText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Этот метод не используется
             }
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Этот метод не используется
             }
 
             override fun afterTextChanged(editable: Editable?) {
@@ -90,6 +98,7 @@ class Search : AppCompatActivity() {
                 } else {
                     View.VISIBLE // Иначе, показываем кнопку очистки
                 }
+                toggleHistoryVisibility()
             }
         })
 
@@ -108,6 +117,8 @@ class Search : AppCompatActivity() {
             clearButton.visibility = View.INVISIBLE // Скрываем кнопку очистки
             hideKeyboard() // Скрываем клавиатуру
             trackAdapter.clearTracks()
+            toggleHistoryVisibility()
+            hidePlaceholder()
         }
 
         // Восстановление текста поиска из savedInstanceState
@@ -126,9 +137,44 @@ class Search : AppCompatActivity() {
                 false
             }
         }
+        trackAdapter.setOnTrackClickListener { track ->
+            addToHistory(track)
+            trackAdapter.notifyDataSetChanged()
+            Toast.makeText(this, "Трек добавлен в историю", Toast.LENGTH_SHORT).show()
 
+        }
+        toggleHistoryVisibility()
     }
 
+    private fun clearSearchHistory() {
+        searchHistory.clear() // Очистка истории
+        searchHistory.saveToPreferences(getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)) // Сохранение изменений
+        toggleHistoryVisibility() // Обновление отображения истории
+        historyAdapter.clearHistory()
+    }
+    private fun addToHistory(track: Track) {
+        searchHistory.addTrack(track) // Добавляем трек в историю
+        searchHistory.saveToPreferences(getSharedPreferences("AppPreferences", Context.MODE_PRIVATE))
+    }
+
+    private fun historyUInvisible(){
+        searchHistoryTitle.visibility = View.GONE
+        clearHistoryButton.visibility = View.GONE
+        historyRecyclerView.visibility = View.GONE
+    }
+
+    private fun toggleHistoryVisibility() {
+        val history = searchHistory.getTracks()
+        Log.d("SearchActivity", "Current history size: ${history.size}")
+        if (history.isNotEmpty()) {
+            searchHistoryTitle.visibility = View.VISIBLE
+            clearHistoryButton.visibility = View.VISIBLE
+            historyRecyclerView.visibility = View.VISIBLE
+            historyAdapter.updateHistory(history) // Используем historyAdapter
+        } else {
+            historyUInvisible()
+        }
+    }
 
     // Проверка интернет соединения
     private fun isNetworkAvailable(): Boolean {
@@ -142,6 +188,7 @@ class Search : AppCompatActivity() {
     private fun performSearch(query: String) {
         if (!isNetworkAvailable()) {
             emptyPlaceholder(getString(R.string.internet_error),R.drawable.internet_error,true)// Показать заглушку при отсутствии интернета
+            historyUInvisible()
             return
         }
 
@@ -158,13 +205,16 @@ class Search : AppCompatActivity() {
         apiService.search(query).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful && response.body() != null) {
-                    handleResponse(response.body()!!) // Обработка успешного ответа
+                    handleResponse(response.body()!!)
+                    historyUInvisible()// Обработка успешного ответа
                 } else {
                     emptyPlaceholder(getString(R.string.nothing),R.drawable.search_error,false) // Показать пустую заглушку при ошибке
+                    historyUInvisible()
                 }
             }
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                 emptyPlaceholder(getString(R.string.nothing), R.drawable.search_error, false) // Обработка ошибки
+                historyUInvisible()
             }
         })
     }
@@ -172,7 +222,9 @@ class Search : AppCompatActivity() {
     private fun handleResponse(apiResponse: ApiResponse) {
         if (apiResponse.resultCount == 0) {
             emptyPlaceholder(getString(R.string.nothing),R.drawable.search_error,false) // Если нет результатов, показать заглушку
+            historyUInvisible()
         } else {
+
             val tracks = apiResponse.results.map { result ->
                 Track(
                     trackName = result.trackName,
@@ -183,6 +235,7 @@ class Search : AppCompatActivity() {
             }
             if (tracks.isEmpty()) {
                 emptyPlaceholder(getString(R.string.nothing), R.drawable.search_error, false)
+                historyUInvisible()
             } else {
                 trackAdapter.updateTracks(tracks) // Обновляем треки в адаптере
                 hidePlaceholder() // Скрываем заглушку, если результаты есть
@@ -224,6 +277,7 @@ class Search : AppCompatActivity() {
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        searchText = savedInstanceState.getString("searchText", "") // Восстанавливаем текст поиска из Bundle
+        searchText = savedInstanceState.getString("searchText", "")
+        toggleHistoryVisibility()// Восстанавливаем текст поиска из Bundle
     }
 }

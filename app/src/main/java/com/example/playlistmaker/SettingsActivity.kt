@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
+import com.google.android.material.switchmaterial.SwitchMaterial
 
 
 class SettingsActivity : AppCompatActivity() {
@@ -49,6 +50,13 @@ class SettingsActivity : AppCompatActivity() {
             val url = getString(R.string.url)
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 startActivity(intent)
+        }
+        val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
+
+        themeSwitcher.isChecked = (applicationContext as App).darkTheme
+
+        themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
+            (applicationContext as App).switchTheme(checked)
         }
     }
 }

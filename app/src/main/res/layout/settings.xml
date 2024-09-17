@@ -48,17 +48,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="@dimen/padding_list">
+            android:paddingBottom="11dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="@dimen/padding_list"
+            android:paddingStart="@dimen/padding_list">
 
             <TextView
                 style="@style/SettingsTextView"
                 android:text="@string/dark_theme" />
 
-            <Switch
-                android:layout_width="45dp"
-                android:layout_height="30dp"
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/themeSwitcher"
                 android:layout_gravity="end|center"
-                app:srcCompat="@drawable/switch_off_icon" />
+                android:layout_marginHorizontal="6dp"
+                android:layout_width="56dp"
+                android:layout_height="40dp"
+                app:trackTint="#E6E8EB"
+                app:thumbTint="#AEAFB4"/>
 
 
         </FrameLayout>

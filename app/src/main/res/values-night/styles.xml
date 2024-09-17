@@ -37,7 +37,7 @@
     <style name="SettingsButtons" parent="@style/Widget.Material3.Button.TextButton.Icon">
         <item name="android:backgroundTint">?android:attr/colorBackground</item>
         <item name="iconTint">?attr/colorSecondary</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
     </style>
 </resources>

@@ -35,7 +35,6 @@
             android:layout_gravity="right"
             android:layout_weight="0" />
 
-
     </LinearLayout>
 
     <LinearLayout
@@ -43,7 +42,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="23"
         android:orientation="vertical">
-
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -100,6 +98,37 @@
             android:orientation="vertical"
             tools:ignore="ExtraText">
 
+            <TextView
+                android:id="@+id/searchHistoryTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/You_searched"
+                android:textSize="18sp"
+                android:visibility="gone"
+                android:textColor="?attr/colorSecondary"
+                android:fontFamily="@font/ys_display_medium"
+                android:layout_margin="@dimen/padding_settings_main"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/historyRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/clearHistoryButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="?attr/colorSecondary"
+                android:text="@string/clear_history"
+                android:textColor="?attr/colorPrimary"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/text_size_settings"
+                android:visibility="gone"
+                android:layout_margin="@dimen/padding_settings_main"/>
+
             <ImageView
                 android:id="@+id/placeholderImage"
                 android:layout_width="wrap_content"
@@ -137,7 +166,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
                 />
 
         </LinearLayout>

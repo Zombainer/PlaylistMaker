@@ -98,7 +98,21 @@ class Search : AppCompatActivity() {
                 } else {
                     View.VISIBLE // Иначе, показываем кнопку очистки
                 }
-                toggleHistoryVisibility()
+                updateUIBasedOnSearchText()
+            }
+            private fun updateUIBasedOnSearchText() {
+                if (searchText.isEmpty()) {
+                    // Показать историю, если текст поиска пустой
+                    toggleHistoryVisibility()
+                    recyclerView.visibility = View.GONE
+                    placeholderImage.visibility = View.GONE
+                    placeholderText.visibility = View.GONE
+                    updateButton.visibility = View.GONE
+                } else {
+                    // Если есть текст, скрыть историю и выполнить поиск
+                    historyUInvisible()
+                    performSearch(searchText)
+                }
             }
         })
 
@@ -119,6 +133,7 @@ class Search : AppCompatActivity() {
             trackAdapter.clearTracks()
             toggleHistoryVisibility()
             hidePlaceholder()
+            recyclerView.visibility = View.GONE
         }
 
         // Восстановление текста поиска из savedInstanceState
@@ -165,15 +180,23 @@ class Search : AppCompatActivity() {
 
     private fun toggleHistoryVisibility() {
         val history = searchHistory.getTracks()
-        Log.d("SearchActivity", "Current history size: ${history.size}")
         if (history.isNotEmpty()) {
             searchHistoryTitle.visibility = View.VISIBLE
             clearHistoryButton.visibility = View.VISIBLE
             historyRecyclerView.visibility = View.VISIBLE
             historyAdapter.updateHistory(history) // Используем historyAdapter
+            historyAdapter.setOnTrackClickListener { track ->
+                moveToTopOfHistory(track) // Перемещение трека на первое место
+                toggleHistoryVisibility() // Обновление отображения
+            }
         } else {
             historyUInvisible()
         }
+    }
+
+    private fun moveToTopOfHistory(track: Track) {
+        searchHistory.addTrack(track) // Добавляем трек в историю (он будет перемещён на первое место)
+        searchHistory.saveToPreferences(getSharedPreferences("AppPreferences", Context.MODE_PRIVATE))
     }
 
     // Проверка интернет соединения
@@ -191,6 +214,8 @@ class Search : AppCompatActivity() {
             historyUInvisible()
             return
         }
+        historyUInvisible()
+        recyclerView.visibility = View.GONE
 
         // Создание экземпляра Retrofit
         val retrofit = Retrofit.Builder()
@@ -205,16 +230,13 @@ class Search : AppCompatActivity() {
         apiService.search(query).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful && response.body() != null) {
-                    handleResponse(response.body()!!)
-                    historyUInvisible()// Обработка успешного ответа
+                    handleResponse(response.body()!!) // Обработка успешного ответа
                 } else {
                     emptyPlaceholder(getString(R.string.nothing),R.drawable.search_error,false) // Показать пустую заглушку при ошибке
-                    historyUInvisible()
                 }
             }
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                 emptyPlaceholder(getString(R.string.nothing), R.drawable.search_error, false) // Обработка ошибки
-                historyUInvisible()
             }
         })
     }

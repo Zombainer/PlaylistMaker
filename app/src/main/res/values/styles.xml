@@ -9,6 +9,9 @@
         <item name="android:backgroundTint">@color/white</item>
         <item name="android:textColor">@color/black</item>
         <item name="iconGravity">textStart</item>
+        <item name="android:textSize">@dimen/playlist_size</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="iconSize">24dp</item>
         <item name="iconPadding">@dimen/button_icon_padding</item>
         <item name="iconTint">@color/black</item>
         <item name="android:layout_width">match_parent</item>

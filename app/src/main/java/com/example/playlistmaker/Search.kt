@@ -21,9 +21,10 @@ import android.view.inputmethod.EditorInfo
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.util.Log
+import android.os.Looper
 import android.widget.TextView
 import android.widget.Toast
+import android.os.Handler
 
 class Search : AppCompatActivity() {
 
@@ -39,6 +40,9 @@ class Search : AppCompatActivity() {
     private lateinit var searchHistory: SearchHistory
     private lateinit var clearHistoryButton: Button
     private lateinit var searchHistoryTitle: TextView
+    private var searchHandler: Handler = Handler(Looper.getMainLooper())
+    private lateinit var searchRunnable: Runnable
+    private var currentCall: Call<ApiResponse>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +67,14 @@ class Search : AppCompatActivity() {
         clearHistoryButton = findViewById(R.id.clearHistoryButton)
         historyRecyclerView.layoutManager = LinearLayoutManager(this)
         historyRecyclerView.adapter = historyAdapter
+
+        searchRunnable = Runnable {
+            if (searchText.isNotEmpty()) {
+                performSearch(searchText)
+            } else {
+                updateUIBasedOnSearchText()
+            }
+        }
 
         updateButton.setOnClickListener {
             performSearch(searchText)
@@ -89,6 +101,9 @@ class Search : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                searchHandler.removeCallbacks(searchRunnable) // Удаляем предыдущий Runnable
+                searchText = s.toString() // Обновляем текст поиска
+                searchHandler.postDelayed(searchRunnable, 300)
             }
 
             override fun afterTextChanged(editable: Editable?) {
@@ -98,22 +113,9 @@ class Search : AppCompatActivity() {
                 } else {
                     View.VISIBLE // Иначе, показываем кнопку очистки
                 }
-                updateUIBasedOnSearchText()
+
             }
-            private fun updateUIBasedOnSearchText() {
-                if (searchText.isEmpty()) {
-                    // Показать историю, если текст поиска пустой
-                    toggleHistoryVisibility()
-                    recyclerView.visibility = View.GONE
-                    placeholderImage.visibility = View.GONE
-                    placeholderText.visibility = View.GONE
-                    updateButton.visibility = View.GONE
-                } else {
-                    // Если есть текст, скрыть историю и выполнить поиск
-                    historyUInvisible()
-                    performSearch(searchText)
-                }
-            }
+
         })
 
         // Обработка фокуса EditText
@@ -159,6 +161,21 @@ class Search : AppCompatActivity() {
 
         }
         toggleHistoryVisibility()
+    }
+
+    private fun updateUIBasedOnSearchText() {
+        if (searchText.isEmpty()) {
+            // Показать историю, если текст поиска пустой
+            toggleHistoryVisibility()
+            recyclerView.visibility = View.GONE
+            placeholderImage.visibility = View.GONE
+            placeholderText.visibility = View.GONE
+            updateButton.visibility = View.GONE
+        } else {
+            // Если есть текст, скрыть историю и выполнить поиск
+            historyUInvisible()
+            performSearch(searchText)
+        }
     }
 
     private fun clearSearchHistory() {
@@ -209,6 +226,11 @@ class Search : AppCompatActivity() {
     }
 
     private fun performSearch(query: String) {
+
+        if (currentCall != null) {
+            currentCall?.cancel() // Отмена текущего запроса
+        }
+
         if (!isNetworkAvailable()) {
             emptyPlaceholder(getString(R.string.internet_error),R.drawable.internet_error,true)// Показать заглушку при отсутствии интернета
             historyUInvisible()
@@ -227,7 +249,8 @@ class Search : AppCompatActivity() {
         val apiService = retrofit.create(ApiService::class.java)
 
         // Выполнение запроса поиска
-        apiService.search(query).enqueue(object : Callback<ApiResponse> {
+        currentCall = apiService.search(query)
+        currentCall?.enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful && response.body() != null) {
                     handleResponse(response.body()!!) // Обработка успешного ответа
@@ -236,7 +259,7 @@ class Search : AppCompatActivity() {
                 }
             }
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                emptyPlaceholder(getString(R.string.nothing), R.drawable.search_error, false) // Обработка ошибки
+
             }
         })
     }

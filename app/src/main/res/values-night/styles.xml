@@ -9,6 +9,9 @@
         <item name="android:backgroundTint">@color/white</item>
         <item name="android:textColor">@color/black</item>
         <item name="iconGravity">textStart</item>
+        <item name="android:textSize">@dimen/playlist_size</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="iconSize">24dp</item>
         <item name="iconPadding">@dimen/button_icon_padding</item>
         <item name="iconTint">@color/black</item>
         <item name="android:layout_width">match_parent</item>
@@ -37,7 +40,7 @@
     <style name="SettingsButtons" parent="@style/Widget.Material3.Button.TextButton.Icon">
         <item name="android:backgroundTint">?android:attr/colorBackground</item>
         <item name="iconTint">?attr/colorSecondary</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
     </style>
 </resources>

@@ -23,5 +23,6 @@ data class Result(
     val primaryGenreName: String?,      // Добавлено поле
     val releaseDate: String?,            // Добавлено поле
     val duration: String,
-    val country: String?
+    val country: String?,
+    val previewUrl: String?
 )

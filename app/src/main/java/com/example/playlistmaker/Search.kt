@@ -19,6 +19,7 @@ import retrofit2.Call
 import retrofit2.Response
 import android.view.inputmethod.EditorInfo
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Looper
@@ -156,9 +157,10 @@ class Search : AppCompatActivity() {
         }
         trackAdapter.setOnTrackClickListener { track ->
             addToHistory(track)
-            trackAdapter.notifyDataSetChanged()
+            val intent = Intent(this, AudioPlayer::class.java)
+            intent.putExtra("TRACK_EXTRA", track) // Отправляем трек
+            startActivity(intent) // Открываем плеер
             Toast.makeText(this, "Трек добавлен в историю", Toast.LENGTH_SHORT).show()
-
         }
         toggleHistoryVisibility()
     }
@@ -203,6 +205,9 @@ class Search : AppCompatActivity() {
             historyRecyclerView.visibility = View.VISIBLE
             historyAdapter.updateHistory(history) // Используем historyAdapter
             historyAdapter.setOnTrackClickListener { track ->
+                val intent = Intent(this, AudioPlayer::class.java)
+                intent.putExtra("TRACK_EXTRA", track) // Отправляем трек
+                startActivity(intent) // Открываем плеер
                 moveToTopOfHistory(track) // Перемещение трека на первое место
                 toggleHistoryVisibility() // Обновление отображения
             }
@@ -275,7 +280,12 @@ class Search : AppCompatActivity() {
                     trackName = result.trackName,
                     artistName = result.artistName,
                     trackTimeMillis = result.trackTimeMillis,
-                    artworkUrl100 = result.artworkUrl100
+                    artworkUrl100 = result.artworkUrl100,
+                    album = result.collectionName ?: "", // Название альбома
+                    genre = result.primaryGenreName ?: "", // Жанр
+                    year = result.releaseDate?.substring(0, 4) ?: "", // Год релиза
+                    duration = formatDuration(result.trackTimeMillis ?: 0), // Длительность
+                    country = result.country ?: "" // Страна
                 )
             }
             if (tracks.isEmpty()) {
@@ -287,6 +297,12 @@ class Search : AppCompatActivity() {
                 trackAdapter.notifyDataSetChanged() // Уведомляем адаптер об изменениях
             }
         }
+    }
+
+    private fun formatDuration(milliseconds: Long): String {
+        val seconds = (milliseconds / 1000) % 60
+        val minutes = (milliseconds / (1000 * 60)) % 60
+        return String.format("%d:%02d", minutes, seconds)
     }
 
     private fun emptyPlaceholder(message: String, imageResId: Int, showUpdateButton: Boolean) {

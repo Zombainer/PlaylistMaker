@@ -18,5 +18,10 @@ data class Result(
     val trackName: String,
     val artistName: String,
     val trackTimeMillis: Long,
-    val artworkUrl100: String
+    val collectionName: String?,
+    val artworkUrl100: String,
+    val primaryGenreName: String?,      // Добавлено поле
+    val releaseDate: String?,            // Добавлено поле
+    val duration: String,
+    val country: String?
 )

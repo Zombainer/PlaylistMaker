@@ -26,6 +26,7 @@ import android.os.Looper
 import android.widget.TextView
 import android.widget.Toast
 import android.os.Handler
+import android.widget.ProgressBar
 
 class Search : AppCompatActivity() {
 
@@ -44,13 +45,16 @@ class Search : AppCompatActivity() {
     private var searchHandler: Handler = Handler(Looper.getMainLooper())
     private lateinit var searchRunnable: Runnable
     private var currentCall: Call<ApiResponse>? = null
+    private lateinit var progressBar: ProgressBar
+    private var trackClickHandler: Handler = Handler(Looper.getMainLooper())
+    private var trackClickRunnable: Runnable = Runnable {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
         editText = findViewById(R.id.searchEditText)
-
+        progressBar = findViewById(R.id.progressBar)
 
         val searchBackButton: Button = findViewById(R.id.searchBack_button)
         val clearButton: ImageView = findViewById(R.id.clearSearchButton)
@@ -78,6 +82,9 @@ class Search : AppCompatActivity() {
         }
 
         updateButton.setOnClickListener {
+            updateButton.visibility = View.GONE
+            placeholderImage.visibility = View.GONE
+            placeholderText.visibility = View.GONE
             performSearch(searchText)
         }
 
@@ -156,12 +163,23 @@ class Search : AppCompatActivity() {
             }
         }
         trackAdapter.setOnTrackClickListener { track ->
-            addToHistory(track)
-            val intent = Intent(this, AudioPlayer::class.java)
-            intent.putExtra("TRACK_EXTRA", track) // Отправляем трек
-            startActivity(intent) // Открываем плеер
-            Toast.makeText(this, "Трек добавлен в историю", Toast.LENGTH_SHORT).show()
+            // Удаляем предыдущие нажатия
+            trackClickHandler.removeCallbacks(trackClickRunnable)
+
+            // Сохраняем текущий трек для использования в Runnable
+            trackClickRunnable = Runnable {
+                addToHistory(track) // Добавляем трек в историю
+
+                val intent = Intent(this, AudioPlayer::class.java)
+                intent.putExtra("TRACK_EXTRA", track) // Отправляем трек
+                startActivity(intent) // Открываем плеер
+                //Toast.makeText(this, "Трек добавлен в историю", Toast.LENGTH_SHORT).show()
+            }
+
+            // Запускаем обработчик нажатий с задержкой
+            trackClickHandler.postDelayed(trackClickRunnable, 300) // Задержка в 300 мс
         }
+
         toggleHistoryVisibility()
     }
 
@@ -243,6 +261,7 @@ class Search : AppCompatActivity() {
         }
         historyUInvisible()
         recyclerView.visibility = View.GONE
+        progressBar.visibility = View.VISIBLE
 
         // Создание экземпляра Retrofit
         val retrofit = Retrofit.Builder()
@@ -257,9 +276,11 @@ class Search : AppCompatActivity() {
         currentCall = apiService.search(query)
         currentCall?.enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                progressBar.visibility = View.GONE
                 if (response.isSuccessful && response.body() != null) {
                     handleResponse(response.body()!!) // Обработка успешного ответа
                 } else {
+                    progressBar.visibility = View.GONE
                     emptyPlaceholder(getString(R.string.nothing),R.drawable.search_error,false) // Показать пустую заглушку при ошибке
                 }
             }
@@ -285,7 +306,8 @@ class Search : AppCompatActivity() {
                     genre = result.primaryGenreName ?: "", // Жанр
                     year = result.releaseDate?.substring(0, 4) ?: "", // Год релиза
                     duration = formatDuration(result.trackTimeMillis ?: 0), // Длительность
-                    country = result.country ?: "" // Страна
+                    country = result.country ?: "", // Страна
+                    previewUrl = result.previewUrl ?: ""
                 )
             }
             if (tracks.isEmpty()) {

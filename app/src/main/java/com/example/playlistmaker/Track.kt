@@ -11,5 +11,6 @@ data class Track(
     val genre: String,
     val year: String,
     val duration: String,
-    val country: String
+    val country: String,
+    val previewUrl: String
 ): Serializable

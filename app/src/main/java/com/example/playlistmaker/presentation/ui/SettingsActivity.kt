@@ -1,36 +1,43 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.presentation.ui
 
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
+import com.example.playlistmaker.App
+import com.example.playlistmaker.R
+import com.example.playlistmaker.domain.interactor.ThemeInteractor
 import com.google.android.material.switchmaterial.SwitchMaterial
 
-
 class SettingsActivity : AppCompatActivity() {
+
+    private lateinit var themeInteractor: ThemeInteractor
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings)
 
-        val settingsBackButton = findViewById<Button>(R.id.settingsBack_button)
+        // Инициализация ThemeInteractor
+        themeInteractor = (applicationContext as App).themeInteractor
 
+        val settingsBackButton = findViewById<Button>(R.id.settingsBack_button)
         settingsBackButton.setOnClickListener {
             finish()
         }
-        val shareButton = findViewById<ImageView>(R.id.share)
 
+        val shareButton = findViewById<ImageView>(R.id.share)
         shareButton.setOnClickListener {
             val shareMessage = getString(R.string.shareMessage)
-
-            val shareIntent = Intent(Intent.ACTION_SEND)
-            shareIntent.type = "text/plain"
-            shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, shareMessage)
+            }
             startActivity(Intent.createChooser(shareIntent, "Share via"))
         }
-        val supportButton = findViewById<ImageView>(R.id.support)
 
+        val supportButton = findViewById<ImageView>(R.id.support)
         supportButton.setOnClickListener {
             val email = getString(R.string.email)
             val subject = getString(R.string.subject)
@@ -42,20 +49,22 @@ class SettingsActivity : AppCompatActivity() {
                 putExtra(Intent.EXTRA_SUBJECT, subject)
                 putExtra(Intent.EXTRA_TEXT, message)
             }
-                startActivity(intent)
+            startActivity(intent)
         }
-        val termsButton = findViewById<ImageView>(R.id.forward)
 
+        val termsButton = findViewById<ImageView>(R.id.forward)
         termsButton.setOnClickListener {
             val url = getString(R.string.url)
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(intent)
+            startActivity(intent)
         }
+
         val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
 
-        themeSwitcher.isChecked = (applicationContext as App).darkTheme
+        // Устанавливаем состояние переключателя в соответствии с текущей темой
+        themeSwitcher.isChecked = themeInteractor.isDarkThemeEnabled()
 
-        themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
+        themeSwitcher.setOnCheckedChangeListener { _, checked ->
             (applicationContext as App).switchTheme(checked)
         }
     }

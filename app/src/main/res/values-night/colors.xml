@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#1A1B22</color>
+    <color name="trackTint">#3772E7</color>
+    <color name="thumbTint">#9FBBF3</color>
+</resources>

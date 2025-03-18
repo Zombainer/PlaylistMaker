@@ -6,7 +6,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:padding="8dp"
-    android:paddingStart="13dp">
+    android:paddingStart="13dp"
+    android:background="@color/background">
 
     <ImageView
         android:id="@+id/artwork"

@@ -1,4 +1,4 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.domain.model
 
 import java.io.Serializable
 
@@ -13,4 +13,4 @@ data class Track(
     val duration: String,
     val country: String,
     val previewUrl: String
-): Serializable
+) : Serializable

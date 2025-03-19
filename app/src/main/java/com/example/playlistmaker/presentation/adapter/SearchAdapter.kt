@@ -10,6 +10,7 @@ import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.model.Track
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.example.playlistmaker.presentation.utils.dpToPx
 
 class SearchAdapter(
     private var tracks: List<Track>,
@@ -54,7 +55,7 @@ class SearchAdapter(
             Glide.with(itemView.context)
                 .load(track.artworkUrl100)
                 .placeholder(R.drawable.track_placeholder)
-                .transform(RoundedCorners(8))
+                .transform(RoundedCorners(dpToPx(itemView.context, 8)))
                 .into(artworkImageView)
         }
     }

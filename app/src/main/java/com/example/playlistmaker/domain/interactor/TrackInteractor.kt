@@ -1,8 +1,7 @@
 package com.example.playlistmaker.domain.interactor
 
-import com.example.playlistmaker.data.dto.ApiResponse
-import retrofit2.Call
+import com.example.playlistmaker.domain.model.Track
 
 interface TrackInteractor {
-    fun searchTracks(query: String): Call<ApiResponse> // Возвращаем Call<ApiResponse>
+    fun searchTracks(query: String, callback: (List<Track>) -> Unit)
 }

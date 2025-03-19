@@ -20,17 +20,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.R
-import com.example.playlistmaker.data.dto.ApiResponse
 import com.example.playlistmaker.domain.interactor.TrackInteractor
 import com.example.playlistmaker.domain.interactor.SearchInteractor
 import com.example.playlistmaker.domain.model.Track
 import com.example.playlistmaker.presentation.adapter.SearchAdapter
 import com.example.playlistmaker.presentation.adapter.TrackAdapter
 import com.example.playlistmaker.presentation.creator.Creator
-import okhttp3.internal.concurrent.formatDuration
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class SearchActivity : AppCompatActivity() {
 
@@ -53,7 +48,6 @@ class SearchActivity : AppCompatActivity() {
 
     private val searchHandler = Handler(Looper.getMainLooper())
     private var searchRunnable: Runnable = Runnable {}
-    private var currentCall: Call<ApiResponse>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,7 +80,7 @@ class SearchActivity : AppCompatActivity() {
         // Настройка RecyclerView для истории поиска
         historyRecyclerView.layoutManager = LinearLayoutManager(this)
         searchAdapter = SearchAdapter(emptyList()) { track ->
-            searchInteractor.moveToTopOfHistory(track) // Перемещаем трек на первое место
+            searchInteractor.moveToTopOfHistory(track)
             openAudioPlayer(track)
         }
         historyRecyclerView.adapter = searchAdapter
@@ -99,13 +93,13 @@ class SearchActivity : AppCompatActivity() {
                 searchHandler.removeCallbacks(searchRunnable)
                 searchRunnable = Runnable {
                     if (s.isNullOrEmpty()) {
-                        updateUIBasedOnSearchText() // Показать историю, если текст пустой
+                        updateUIBasedOnSearchText()
                     } else {
-                        historyUInvisible() // Скрыть историю, если текст не пустой
-                        performSearch(s.toString()) // Выполнить поиск
+                        historyUInvisible()
+                        performSearch(s.toString())
                     }
                 }
-                searchHandler.postDelayed(searchRunnable, 300) // Задержка 300 мс
+                searchHandler.postDelayed(searchRunnable, 300)
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -123,7 +117,7 @@ class SearchActivity : AppCompatActivity() {
         // Кнопка "Назад"
         val searchBackButton: Button = findViewById(R.id.searchBack_button)
         searchBackButton.setOnClickListener {
-            finish() // Закрываем Activity
+            finish()
         }
 
         // Обновление результатов поиска
@@ -143,19 +137,17 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        updateUIBasedOnSearchText() // Обновляем UI при возвращении на экран
+        updateUIBasedOnSearchText()
     }
 
     private fun updateUIBasedOnSearchText() {
         if (searchEditText.text.isNullOrEmpty()) {
-            // Показать историю, если текст поиска пустой
             toggleHistoryVisibility()
             recyclerView.visibility = View.GONE
             placeholderImage.visibility = View.GONE
             placeholderText.visibility = View.GONE
             updateButton.visibility = View.GONE
         } else {
-            // Скрыть историю, если текст не пустой
             historyUInvisible()
             recyclerView.visibility = View.VISIBLE
         }
@@ -176,11 +168,8 @@ class SearchActivity : AppCompatActivity() {
             return
         }
 
-        // Отменяем текущий запрос, если он есть
-        currentCall?.cancel()
-
         if (!isNetworkAvailable()) {
-            showPlaceholder(getString(R.string.internet_error), R.drawable.internet_error, true) // Показать заглушку при отсутствии интернета
+            showPlaceholder(getString(R.string.internet_error), R.drawable.internet_error, true)
             historyUInvisible()
             return
         }
@@ -192,31 +181,8 @@ class SearchActivity : AppCompatActivity() {
         updateButton.visibility = View.GONE
 
         // Используем trackInteractor для выполнения поиска
-        currentCall = trackInteractor.searchTracks(query)
-        currentCall?.enqueue(object : Callback<ApiResponse> {
-            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                progressBar.visibility = View.GONE
-                if (response.isSuccessful && response.body() != null) {
-                    handleResponse(response.body()!!) // Обработка успешного ответа
-                } else {
-                    progressBar.visibility = View.GONE
-                    showPlaceholder(getString(R.string.nothing), R.drawable.search_error, false) // Показать пустую заглушку при ошибке
-                }
-            }
-
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                progressBar.visibility = View.GONE
-                showPlaceholder(getString(R.string.internet_error), R.drawable.internet_error, true) // Показать заглушку при ошибке сети
-            }
-        })
-    }
-
-    private fun handleResponse(apiResponse: ApiResponse) {
-        if (apiResponse.resultCount == 0) {
-            showPlaceholder(getString(R.string.nothing), R.drawable.search_error, false)
-            historyUInvisible()
-        } else {
-            val tracks = apiResponse.results.map { it.toTrack() } // Используем toTrack
+        trackInteractor.searchTracks(query) { tracks ->
+            progressBar.visibility = View.GONE
             if (tracks.isEmpty()) {
                 showPlaceholder(getString(R.string.nothing), R.drawable.search_error, false)
                 historyUInvisible()
@@ -231,7 +197,7 @@ class SearchActivity : AppCompatActivity() {
     private fun toggleHistoryVisibility() {
         val history = searchInteractor.getSearchHistory()
         if (history.isEmpty()) {
-            historyUInvisible() // Скрыть историю, если она пуста
+            historyUInvisible()
         } else {
             searchAdapter.updateTracks(history)
             searchHistoryTitle.visibility = View.VISIBLE

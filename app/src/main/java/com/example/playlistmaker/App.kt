@@ -5,19 +5,23 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.playlistmaker.data.SharedPreferencesHelper
 import com.example.playlistmaker.domain.interactor.ThemeInteractor
+import com.example.playlistmaker.presentation.creator.Creator
+import com.google.gson.Gson
 
 class App : Application() {
 
     private lateinit var sharedPreferencesHelper: SharedPreferencesHelper
-    lateinit var themeInteractor: ThemeInteractor // Делаем themeInteractor публичным
+    lateinit var themeInteractor: ThemeInteractor
 
     override fun onCreate() {
         super.onCreate()
 
+        val gson = Gson() // Создаем экземпляр Gson
         sharedPreferencesHelper = SharedPreferencesHelper(
-            getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+            getSharedPreferences("app_preferences", Context.MODE_PRIVATE),
+            gson // Передаем gson
         )
-        themeInteractor = ThemeInteractor(sharedPreferencesHelper)
+        themeInteractor = Creator.provideThemeInteractor(this)
 
         // Применяем тему на основании сохранённого значения
         switchTheme(themeInteractor.isDarkThemeEnabled())

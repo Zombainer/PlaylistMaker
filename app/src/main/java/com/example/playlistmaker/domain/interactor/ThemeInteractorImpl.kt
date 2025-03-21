@@ -1,13 +1,13 @@
 package com.example.playlistmaker.domain.interactor
 
-import com.example.playlistmaker.data.SharedPreferencesHelper
+import com.example.playlistmaker.domain.repository.ThemeRepository
 
-class ThemeInteractorImpl(private val sharedPreferencesHelper: SharedPreferencesHelper) : ThemeInteractor {
+class ThemeInteractorImpl(private val themeRepository: ThemeRepository) : ThemeInteractor {
     override fun isDarkThemeEnabled(): Boolean {
-        return sharedPreferencesHelper.darkTheme
+        return themeRepository.isDarkThemeEnabled()
     }
 
     override fun switchTheme(darkThemeEnabled: Boolean) {
-        sharedPreferencesHelper.darkTheme = darkThemeEnabled
+        themeRepository.setDarkThemeEnabled(darkThemeEnabled)
     }
 }

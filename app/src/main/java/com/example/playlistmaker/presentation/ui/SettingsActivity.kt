@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.playlistmaker.App
 import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.interactor.ThemeInteractor
+import com.example.playlistmaker.presentation.creator.Creator
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 class SettingsActivity : AppCompatActivity() {
@@ -19,8 +20,8 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings)
 
-        // Инициализация ThemeInteractor
-        themeInteractor = (applicationContext as App).themeInteractor
+        // Инициализация ThemeInteractor через Creator
+        themeInteractor = Creator.provideThemeInteractor(this)
 
         val settingsBackButton = findViewById<Button>(R.id.settingsBack_button)
         settingsBackButton.setOnClickListener {
@@ -65,6 +66,7 @@ class SettingsActivity : AppCompatActivity() {
         themeSwitcher.isChecked = themeInteractor.isDarkThemeEnabled()
 
         themeSwitcher.setOnCheckedChangeListener { _, checked ->
+            themeInteractor.switchTheme(checked)
             (applicationContext as App).switchTheme(checked)
         }
     }

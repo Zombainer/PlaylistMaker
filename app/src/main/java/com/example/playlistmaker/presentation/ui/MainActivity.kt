@@ -1,12 +1,10 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.presentation.ui
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
-
-
-
+import com.example.playlistmaker.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,7 +17,7 @@ class MainActivity : AppCompatActivity() {
 
 
         searchButton.setOnClickListener {
-            val displayIntent = Intent(this, Search::class.java)
+            val displayIntent = Intent(this, SearchActivity::class.java)
             startActivity(displayIntent)
         }
         mediaLibraryButton.setOnClickListener {

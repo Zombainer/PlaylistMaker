@@ -2,36 +2,33 @@ package com.example.playlistmaker
 
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
+import com.example.playlistmaker.data.SharedPreferencesHelper
+import com.example.playlistmaker.domain.interactor.ThemeInteractor
+import com.example.playlistmaker.presentation.creator.Creator
+import com.google.gson.Gson
 
 class App : Application() {
 
-    companion object {
-        private const val APP_PREFERENCE = "app_preferences"
-        private const val DARK_THEME = "dark_theme"
-    }
-
-    private lateinit var sharedPreferences: SharedPreferences
-    var darkTheme = false
+    private lateinit var sharedPreferencesHelper: SharedPreferencesHelper
+    lateinit var themeInteractor: ThemeInteractor
 
     override fun onCreate() {
         super.onCreate()
 
-        // Инициализируем SharedPreferences
-        sharedPreferences = getSharedPreferences(APP_PREFERENCE, Context.MODE_PRIVATE)
-
-        // Получаем сохранённое значение темы из SharedPreferences
-        darkTheme = sharedPreferences.getBoolean(DARK_THEME, false)
+        val gson = Gson() // Создаем экземпляр Gson
+        sharedPreferencesHelper = SharedPreferencesHelper(
+            getSharedPreferences("app_preferences", Context.MODE_PRIVATE),
+            gson // Передаем gson
+        )
+        themeInteractor = Creator.provideThemeInteractor(this)
 
         // Применяем тему на основании сохранённого значения
-        switchTheme(darkTheme)
+        switchTheme(themeInteractor.isDarkThemeEnabled())
     }
 
     fun switchTheme(darkThemeEnabled: Boolean) {
-        darkTheme = darkThemeEnabled
-
-        // Изменяем режим ночной темы
+        themeInteractor.switchTheme(darkThemeEnabled)
         AppCompatDelegate.setDefaultNightMode(
             if (darkThemeEnabled) {
                 AppCompatDelegate.MODE_NIGHT_YES
@@ -39,9 +36,5 @@ class App : Application() {
                 AppCompatDelegate.MODE_NIGHT_NO
             }
         )
-
-        // Сохраняем текущее значение темы в SharedPreferences
-        sharedPreferences.edit().putBoolean(DARK_THEME, darkTheme).apply()
     }
 }
-

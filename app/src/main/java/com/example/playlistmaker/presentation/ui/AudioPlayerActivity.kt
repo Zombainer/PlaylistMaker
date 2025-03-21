@@ -1,4 +1,4 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.presentation.ui
 
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -9,14 +9,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.io.Serializable
+import com.example.playlistmaker.R
+import com.example.playlistmaker.domain.model.Track
 
-class AudioPlayer : AppCompatActivity() {
+class AudioPlayerActivity : AppCompatActivity() {
 
     private lateinit var trackTitleTextView: TextView
     private lateinit var artistNameTextView: TextView
@@ -28,9 +24,8 @@ class AudioPlayer : AppCompatActivity() {
     private lateinit var albumCoverImageView: ImageView
     private lateinit var timeTextView: TextView
     private lateinit var playButton: ImageView
-    private var mediaPlayer = MediaPlayer()
+    private var mediaPlayer: MediaPlayer? = null
     private var handler = Handler()
-    private var url: String? = null
     private var playerState = STATE_DEFAULT
 
     companion object {
@@ -43,9 +38,9 @@ class AudioPlayer : AppCompatActivity() {
     private val updateTimeRunnable = object : Runnable {
         override fun run() {
             if (playerState == STATE_PLAYING) {
-                val currentPosition = mediaPlayer.currentPosition
+                val currentPosition = mediaPlayer?.currentPosition ?: 0
                 timeTextView.text = formatTime(currentPosition)
-                handler.postDelayed(this, 1000) // обновление каждую секунду
+                handler.postDelayed(this, 1000)
             }
         }
     }
@@ -64,9 +59,9 @@ class AudioPlayer : AppCompatActivity() {
         durationTextView = findViewById(R.id.DurationEdit)
         albumCoverImageView = findViewById(R.id.AlbumCoverEdit)
         timeTextView = findViewById(R.id.TimeEdit)
-        val playerBack_button: Button = findViewById(R.id.playerBack_button)
+        val playerBackButton: Button = findViewById(R.id.playerBack_button)
 
-        playerBack_button.setOnClickListener {
+        playerBackButton.setOnClickListener {
             finish()
         }
 
@@ -74,11 +69,12 @@ class AudioPlayer : AppCompatActivity() {
             playbackControl()
         }
 
+        // Получаем трек из Intent
         val track = intent.getSerializableExtra("TRACK_EXTRA") as Track
         displayTrackInfo(track)
 
-        // Получаем URL для воспроизведения трека
-        fetchTrackUrl(track.trackName)
+        // Подготавливаем MediaPlayer для воспроизведения трека
+        preparePlayer(track.previewUrl)
     }
 
     private fun displayTrackInfo(track: Track) {
@@ -90,71 +86,53 @@ class AudioPlayer : AppCompatActivity() {
         countryTextView.text = track.country
         durationTextView.text = track.duration
 
+        // Загрузка обложки альбома с помощью Glide
         val artworkUrl100 = track.artworkUrl100
         val artworkUrl512 = artworkUrl100.replace("100x100bb", "512x512bb")
 
         Glide.with(this)
             .load(artworkUrl512)
-            .apply(RequestOptions()
-                .placeholder(R.drawable.track_placeholder)
-                .error(R.drawable.track_placeholder)
-                .fitCenter()
-                .centerCrop())
+            .apply(
+                RequestOptions()
+                    .placeholder(R.drawable.track_placeholder)
+                    .error(R.drawable.track_placeholder)
+                    .fitCenter()
+                    .centerCrop()
+            )
             .into(albumCoverImageView)
     }
 
-    private fun fetchTrackUrl(trackName: String) {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://itunes.apple.com")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val apiService = retrofit.create(ApiService::class.java)
-        apiService.search(trackName).enqueue(object : Callback<ApiResponse> {
-            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                if (response.isSuccessful) {
-                    response.body()?.let { apiResponse ->
-                        if (apiResponse.resultCount > 0) {
-                            val result = apiResponse.results.first()
-                            url = result.previewUrl // Используем previewUrl для воспроизведения
-                            preparePlayer()
-                        }
-                    }
+    private fun preparePlayer(previewUrl: String?) {
+        if (previewUrl != null) {
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(previewUrl)
+                prepareAsync()
+                setOnPreparedListener {
+                    playButton.isEnabled = true
+                    playerState = STATE_PREPARED
+                }
+                setOnCompletionListener {
+                    playerState = STATE_PREPARED
+                    handler.removeCallbacks(updateTimeRunnable)
+                    playButton.setImageResource(R.drawable.play_icon)
+                    timeTextView.text = formatTime(0)
                 }
             }
-
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                t.printStackTrace() // Обработка ошибки
-            }
-        })
-    }
-
-    private fun preparePlayer() {
-        if (url != null) {
-            mediaPlayer.setDataSource(url)
-            mediaPlayer.prepareAsync()
-            mediaPlayer.setOnPreparedListener {
-                playButton.isEnabled = true
-                playerState = STATE_PREPARED
-            }
-            mediaPlayer.setOnCompletionListener {
-                playerState = STATE_PREPARED
-                handler.removeCallbacks(updateTimeRunnable)
-                playButton.setImageResource(R.drawable.play_icon)
-                timeTextView.text = formatTime(0)
-            }
+        } else {
+            // Обработка случая, если previewUrl отсутствует
+            playButton.isEnabled = false
         }
     }
 
     private fun startPlayer() {
-        mediaPlayer.start()
+        mediaPlayer?.start()
         playerState = STATE_PLAYING
         playButton.setImageResource(R.drawable.pause_icon)
         handler.post(updateTimeRunnable)
     }
 
     private fun pausePlayer() {
-        mediaPlayer.pause()
+        mediaPlayer?.pause()
         playerState = STATE_PAUSED
         playButton.setImageResource(R.drawable.play_icon)
         handler.removeCallbacks(updateTimeRunnable)
@@ -162,15 +140,10 @@ class AudioPlayer : AppCompatActivity() {
 
     private fun playbackControl() {
         when (playerState) {
-            STATE_PLAYING -> {
-                pausePlayer()
-            }
-            STATE_PREPARED, STATE_PAUSED -> {
-                startPlayer()
-            }
+            STATE_PLAYING -> pausePlayer()
+            STATE_PREPARED, STATE_PAUSED -> startPlayer()
         }
     }
-
 
     private fun formatTime(milliseconds: Int): String {
         val seconds = (milliseconds / 1000) % 60
@@ -185,7 +158,7 @@ class AudioPlayer : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer.release()
+        mediaPlayer?.release()
         handler.removeCallbacks(updateTimeRunnable)
     }
 }
